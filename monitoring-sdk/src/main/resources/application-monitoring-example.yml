@@ -1,0 +1,8 @@
+monitoring:
+  enabled: true
+  api-key: your-api-key-here
+  project-id: your-project-id
+  backend-url: http://localhost:8080/api
+  async: true
+  max-body-size: 10000
+  max-response-size: 10000
