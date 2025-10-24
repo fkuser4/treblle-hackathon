@@ -17,6 +17,8 @@ public interface ApiRequestRepository extends JpaRepository<ApiRequest, UUID> {
 
     Page<ApiRequest> findByProjectId(String projectId, Pageable pageable);
 
+    List<ApiRequest> findByProjectId(String projectId);
+
     Page<ApiRequest> findByProjectIdAndMethod(String projectId, String method, Pageable pageable);
 
     Page<ApiRequest> findByProjectIdAndResponseStatus(String projectId, Integer responseStatus, Pageable pageable);
