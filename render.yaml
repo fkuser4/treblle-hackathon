@@ -37,10 +37,7 @@ services:
       - key: MONITORING_PROJECT_ID
         value: demo-project-001
       - key: MONITORING_BACKEND_URL
-        fromService:
-          type: web
-          name: monitoring-backend
-          property: url
+        value: http://monitoring-backend:8080/api
       - key: MONITORING_ASYNC
         value: true
       - key: SERVER_PORT
@@ -49,5 +46,5 @@ services:
 databases:
   - name: monitoring-db
     databaseName: monitoring_db
-    user: postgres
+    user: monitoring_user
     plan: free
