@@ -2,6 +2,8 @@ package com.hackathon.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hackathon.backend.dto.request.CreateApiRequestDto;
+import com.hackathon.backend.repository.ApiRequestRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,7 +28,15 @@ class ApiRequestControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private ApiRequestRepository repository;
+
     private static final String API_KEY = "hackathon-2025-super-secret-key";
+
+    @BeforeEach
+    void setUp() {
+        repository.deleteAll();
+    }
 
     @Test
     void createRequest_withValidData_shouldReturn201() throws Exception {
@@ -100,7 +110,10 @@ class ApiRequestControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)));
 
+        Thread.sleep(1000);
+
         mockMvc.perform(get("/api/requests/list")
+                        .header("X-API-Key", API_KEY)
                         .param("projectId", "test-list"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
@@ -109,6 +122,7 @@ class ApiRequestControllerIntegrationTest {
     @Test
     void getTableView_shouldReturnPagedResults() throws Exception {
         mockMvc.perform(get("/api/requests/table")
+                        .header("X-API-Key", API_KEY)
                         .param("projectId", "test-project")
                         .param("page", "0")
                         .param("size", "10"))
