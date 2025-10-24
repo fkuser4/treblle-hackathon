@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: monitoring-postgres
+    environment:
+      POSTGRES_DB: monitoring_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - monitoring-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Monitoring Backend
+  backend:
+    build:
+      context: .
+      dockerfile: monitoring-backend/Dockerfile
+    container_name: monitoring-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/monitoring_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Demo Application
+  demo:
+    build:
+      context: .
+      dockerfile: demo-application/Dockerfile
+    container_name: demo-application
+    environment:
+      MONITORING_ENABLED: "true"
+      MONITORING_API_KEY: hackathon-2024-super-secret-key
+      MONITORING_PROJECT_ID: demo-project-001
+      MONITORING_BACKEND_URL: http://backend:8080/api
+      MONITORING_ASYNC: "true"
+      SERVER_PORT: 9090
+    ports:
+      - "9090:9090"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+
+networks:
+  monitoring-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
