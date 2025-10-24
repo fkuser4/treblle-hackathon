@@ -1,7 +1,4 @@
-version: '3.8'
-
 services:
-
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
@@ -43,12 +40,6 @@ services:
     networks:
       - monitoring-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   # Demo Application
   demo:
@@ -66,8 +57,7 @@ services:
     ports:
       - "9090:9090"
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     networks:
       - monitoring-network
     restart: unless-stopped

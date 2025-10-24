@@ -1,23 +1,23 @@
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM eclipse-temurin:17-jdk AS build
 
-WORKDIR /workspace/app
+WORKDIR /workspace
 
-COPY ../pom.xml ../pom.xml
-COPY pom.xml .
-COPY src src
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 
-COPY ../monitoring-sdk ../monitoring-sdk
+COPY pom.xml /workspace/pom.xml
+RUN mvn -N install
 
-RUN --mount=type=cache,target=/root/.m2 \
-    apk add --no-cache maven && \
-    mvn install -pl ../monitoring-sdk -am -DskipTests && \
-    mvn clean package -DskipTests
+COPY monitoring-sdk /workspace/monitoring-sdk
+RUN cd monitoring-sdk && mvn clean install -DskipTests
 
-FROM eclipse-temurin:17-jre-alpine
+COPY demo-application /workspace/demo-application
+RUN cd demo-application && mvn clean package -DskipTests
+
+FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-COPY --from=build /workspace/app/target/*.jar app.jar
+COPY --from=build /workspace/demo-application/target/*.jar app.jar
 
 EXPOSE 9090
 
