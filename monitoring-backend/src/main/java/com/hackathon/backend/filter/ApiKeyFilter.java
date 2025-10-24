@@ -1,4 +1,4 @@
-package com.hackathon.backend.config;
+package com.hackathon.backend.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
