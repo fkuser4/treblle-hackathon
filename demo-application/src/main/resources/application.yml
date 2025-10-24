@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: demo-application
+
+server:
+  port: 9090
+
+# Monitoring SDK Configuration
+monitoring:
+  enabled: true
+  api-key: hackathon-2025-super-secret-key
+  project-id: demo-project-001
+  backend-url: http://localhost:8080/api
+  async: true
+  max-body-size: 5000
+  max-response-size: 5000
+
+logging:
+  level:
+    com.hackathon.demo: INFO
+    com.hackathon.sdk: DEBUG
