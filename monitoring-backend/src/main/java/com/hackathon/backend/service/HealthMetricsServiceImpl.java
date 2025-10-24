@@ -47,7 +47,24 @@ public class HealthMetricsServiceImpl implements HealthMetricsService {
             return;
         }
 
-        EndpointHealthMetrics metrics = calculateMetrics(projectId, endpoint, requests);
+        EndpointHealthMetrics newMetrics = calculateMetrics(projectId, endpoint, requests);
+
+        EndpointHealthMetrics metrics = metricsRepository
+                .findByProjectIdAndEndpoint(projectId, endpoint)
+                .map(existing -> {
+                    existing.setAvgResponseTime(newMetrics.getAvgResponseTime());
+                    existing.setMinResponseTime(newMetrics.getMinResponseTime());
+                    existing.setMaxResponseTime(newMetrics.getMaxResponseTime());
+                    existing.setTotalRequests(newMetrics.getTotalRequests());
+                    existing.setSuccessCount(newMetrics.getSuccessCount());
+                    existing.setErrorCount(newMetrics.getErrorCount());
+                    existing.setSuccessRate(newMetrics.getSuccessRate());
+                    existing.setHealthScore(newMetrics.getHealthScore());
+                    existing.setLastUpdated(LocalDateTime.now());
+                    return existing;
+                })
+                .orElse(newMetrics);
+
         metricsRepository.save(metrics);
 
         log.debug("Successfully updated metrics for endpoint: {}", endpoint);

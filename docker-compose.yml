@@ -49,7 +49,7 @@ services:
     container_name: demo-application
     environment:
       MONITORING_ENABLED: "true"
-      MONITORING_API_KEY: hackathon-2024-super-secret-key
+      MONITORING_API_KEY: hackathon-2025-super-secret-key
       MONITORING_PROJECT_ID: demo-project-001
       MONITORING_BACKEND_URL: http://backend:8080/api
       MONITORING_ASYNC: "true"
