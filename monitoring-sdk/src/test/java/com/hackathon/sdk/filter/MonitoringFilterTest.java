@@ -45,11 +45,6 @@ class MonitoringFilterTest {
         filter = new MonitoringFilter(monitoringService, properties);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
-
-        when(properties.isEnabled()).thenReturn(true);
-        when(properties.getProjectId()).thenReturn("test-project");
-        when(properties.getMaxBodySize()).thenReturn(10000);
-        when(properties.getMaxResponseSize()).thenReturn(10000);
     }
 
     @Test
@@ -66,6 +61,7 @@ class MonitoringFilterTest {
 
     @Test
     void doFilterInternal_whenActuatorEndpoint_shouldSkipMonitoring() throws ServletException, IOException {
+        when(properties.isEnabled()).thenReturn(true);
         request.setRequestURI("/actuator/health");
         request.setMethod("GET");
 
@@ -76,6 +72,7 @@ class MonitoringFilterTest {
 
     @Test
     void doFilterInternal_whenSwaggerEndpoint_shouldSkipMonitoring() throws ServletException, IOException {
+        when(properties.isEnabled()).thenReturn(true);
         request.setRequestURI("/swagger-ui/index.html");
         request.setMethod("GET");
 
@@ -86,16 +83,15 @@ class MonitoringFilterTest {
 
     @Test
     void doFilterInternal_whenValidRequest_shouldCaptureMonitoringData() throws ServletException, IOException {
+        when(properties.isEnabled()).thenReturn(true);
+        when(properties.getProjectId()).thenReturn("test-project");
+        lenient().when(properties.getMaxBodySize()).thenReturn(10000);
+        lenient().when(properties.getMaxResponseSize()).thenReturn(10000);
+
         request.setRequestURI("/api/users");
         request.setMethod("GET");
         request.setQueryString("page=1");
         response.setStatus(200);
-
-        doAnswer(invocation -> {
-            response.getWriter().write("test response");
-            return null;
-        }).when(filterChain).doFilter(any(), any());
-
 
         filter.doFilterInternal(request, response, filterChain);
 
@@ -113,6 +109,11 @@ class MonitoringFilterTest {
 
     @Test
     void doFilterInternal_shouldCaptureRequestHeaders() throws ServletException, IOException {
+        when(properties.isEnabled()).thenReturn(true);
+        when(properties.getProjectId()).thenReturn("test-project");
+        lenient().when(properties.getMaxBodySize()).thenReturn(10000);
+        lenient().when(properties.getMaxResponseSize()).thenReturn(10000);
+
         request.setRequestURI("/api/users");
         request.setMethod("GET");
         request.addHeader("Content-Type", "application/json");
@@ -123,12 +124,17 @@ class MonitoringFilterTest {
         verify(monitoringService).captureRequest(payloadCaptor.capture());
         ApiRequestPayload capturedPayload = payloadCaptor.getValue();
 
-        assertThat(capturedPayload.getRequestHeaders()).containsEntry("content-type", "application/json");
-        assertThat(capturedPayload.getRequestHeaders()).containsEntry("user-agent", "TestAgent");
+        assertThat(capturedPayload.getRequestHeaders()).containsEntry("Content-Type", "application/json");
+        assertThat(capturedPayload.getRequestHeaders()).containsEntry("User-Agent", "TestAgent");
     }
 
     @Test
     void doFilterInternal_shouldMeasureResponseTime() throws ServletException, IOException {
+        when(properties.isEnabled()).thenReturn(true);
+        when(properties.getProjectId()).thenReturn("test-project");
+        lenient().when(properties.getMaxBodySize()).thenReturn(10000);
+        lenient().when(properties.getMaxResponseSize()).thenReturn(10000);
+
         request.setRequestURI("/api/users");
         request.setMethod("GET");
 
