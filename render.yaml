@@ -1,0 +1,53 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: monitoring-db
+    env: docker
+    plan: free
+
+  # Backend API
+  - type: web
+    name: monitoring-backend
+    env: docker
+    dockerfilePath: ./monitoring-backend/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: monitoring-db
+          property: connectionString
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: SERVER_PORT
+        value: 8080
+
+  # Demo Application
+  - type: web
+    name: demo-application
+    env: docker
+    dockerfilePath: ./demo-application/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: MONITORING_ENABLED
+        value: true
+      - key: MONITORING_API_KEY
+        value: hackathon-2025-super-secret-key
+      - key: MONITORING_PROJECT_ID
+        value: demo-project-001
+      - key: MONITORING_BACKEND_URL
+        fromService:
+          type: web
+          name: monitoring-backend
+          property: url
+      - key: MONITORING_ASYNC
+        value: true
+      - key: SERVER_PORT
+        value: 9090
+
+databases:
+  - name: monitoring-db
+    databaseName: monitoring_db
+    user: postgres
+    plan: free
