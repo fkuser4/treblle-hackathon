@@ -1,4 +1,4 @@
-package com.hackathon.backend.filter;
+package com.hackathon.backend.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -41,7 +41,6 @@ public class ApiKeyFilter extends OncePerRequestFilter {
         }
 
         String apiKey = request.getHeader("X-API-Key");
-        String projectId = request.getHeader("X-Project-ID");
 
         if (apiKey == null || apiKey.isEmpty()) {
             log.warn("Missing API key in request to: {}", requestUri);
@@ -55,13 +54,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (projectId == null || projectId.isEmpty()) {
-            log.warn("Missing Project ID in request");
-            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "Project ID is required");
-            return;
-        }
-
-        log.debug("Valid API key for project: {}", projectId);
+        log.debug("Valid API key - request authorized");
         filterChain.doFilter(request, response);
     }
 

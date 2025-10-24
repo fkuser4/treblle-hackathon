@@ -30,7 +30,6 @@ public class MonitoringApiClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("X-API-Key", properties.getApiKey());
-        headers.set("X-Project-ID", properties.getProjectId());
 
         HttpEntity<ApiRequestPayload> request = new HttpEntity<>(payload, headers);
 
